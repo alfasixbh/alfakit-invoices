@@ -1,0 +1,97 @@
+{
+  "name": "alfasix/alfakit-invoices",
+  "description": "Invoices, quotes, credit notes and receipts for AlfaKit panels: exact integer money in any currency, inclusive, exclusive and compound taxes, atomic per-tenant numbering, live server-side totals, payments, overdue tracking, a branded print-ready document with a pluggable PDF renderer and a signed customer view link.",
+  "keywords": [
+    "laravel",
+    "alfakit",
+    "invoices",
+    "quotes",
+    "credit-notes",
+    "receipts",
+    "billing",
+    "pdf"
+  ],
+  "homepage": "https://alfakit.dev/docs/plugins/invoices",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Alfa Six",
+      "homepage": "https://alfasixbh.com",
+      "role": "Developer"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/alfasixbh/alfakit/issues",
+    "source": "https://github.com/alfasixbh/alfakit"
+  },
+  "require": {
+    "php": "^8.3",
+    "ext-intl": "*",
+    "alfasix/alfakit": "^0.1|@dev",
+    "brick/math": "^0.11|^0.12|^0.13|^0.14|^0.15|^0.16|^0.17|^0.18|^0.19|^0.20|^1.0"
+  },
+  "suggest": {
+    "barryvdh/laravel-dompdf": "Render invoices as PDF files with Dompdf (used automatically when installed).",
+    "dompdf/dompdf": "Render invoices as PDF files with Dompdf (used automatically when installed).",
+    "spatie/laravel-pdf": "Render invoices as PDF files with headless Chrome, best for right-to-left scripts (used automatically when installed).",
+    "alfasix/alfakit-billing": "A \"Pay now\" button on the customer invoice page through your billing provider."
+  },
+  "autoload": {
+    "psr-4": {
+      "AlfaSix\\AlfakitInvoices\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "AlfaSix\\AlfakitInvoices\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "AlfaSix\\AlfakitInvoices\\AlfakitInvoicesServiceProvider"
+      ]
+    },
+    "alfakit": {
+      "version": "^0.1",
+      "frontend": null,
+      "showcase": {
+        "demoPath": "invoices",
+        "tour": [
+          "Open Sales > Invoices",
+          "Create an invoice with live totals",
+          "Record a payment",
+          "Open the print-ready document"
+        ],
+        "clips": [
+          "react-light",
+          "react-dark",
+          "vue-light",
+          "vue-dark",
+          "svelte-light",
+          "svelte-dark"
+        ],
+        "worksWith": [
+          "billing",
+          "workflows",
+          "file-manager"
+        ],
+        "highlights": [
+          "Invoices, quotes, credit notes and receipts",
+          "Exact integer money in any currency",
+          "Inclusive, exclusive and compound taxes",
+          "Atomic per-tenant numbering",
+          "Live server-side totals",
+          "Payments and overdue tracking",
+          "Branded document and signed customer link"
+        ]
+      }
+    }
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
