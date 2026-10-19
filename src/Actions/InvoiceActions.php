@@ -14,7 +14,6 @@ use AlfaSix\Alfakit\Forms\Components\Textarea;
 use AlfaSix\Alfakit\Forms\Components\TextInput;
 use AlfaSix\Alfakit\Forms\Components\Toggle;
 use AlfaSix\Alfakit\Notifications\Notification;
-use AlfaSix\Alfakit\Support\Currency;
 use AlfaSix\AlfakitInvoices\Enums\InvoiceStatus;
 use AlfaSix\AlfakitInvoices\Enums\InvoiceType;
 use AlfaSix\AlfakitInvoices\Exceptions\InvalidPayment;
@@ -152,7 +151,8 @@ final class InvoiceActions
             ->modalWidth('md')
             ->authorize(static fn (?Model $record): bool => self::can('recordPayment', $record))
             ->fillForm(static fn (?Model $record): array => $record instanceof Invoice ? [
-                'amount' => Currency::fromMinorUnits((int) $record->amount_due, $record->currency),
+                // The field uses minorUnits(): its state is in the smallest unit, like amount_due.
+                'amount' => (int) $record->amount_due,
                 'paid_at' => Carbon::today()->format('Y-m-d'),
                 'method' => array_key_first(Payment::methodOptions()),
             ] : [])

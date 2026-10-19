@@ -313,10 +313,12 @@ class InvoiceResource extends Resource
 
         return Repeater::make('items')
             ->hiddenLabel()
+            // The only component of its section: use its whole width, not one of two columns.
+            ->columnSpanFull()
             ->relationship()
             ->orderColumn('sort')
             ->table([
-                TableColumn::make(__('alfakit-invoices::invoices.fields.description'))->width('34%'),
+                TableColumn::make(__('alfakit-invoices::invoices.fields.description'))->width('16rem'),
                 TableColumn::make(__('alfakit-invoices::invoices.fields.quantity'))->width('9rem')->alignment(Alignment::End),
                 TableColumn::make(__('alfakit-invoices::invoices.fields.unit_price'))->width('11rem')->alignment(Alignment::End),
                 TableColumn::make(__('alfakit-invoices::invoices.fields.discount'))->width('12rem'),
@@ -532,6 +534,7 @@ class InvoiceResource extends Resource
                         ->schema([
                             RepeatableEntry::make('items')
                                 ->hiddenLabel()
+                                ->columnSpanFull()
                                 ->state(static fn (Invoice $record): mixed => $record->items()->with('invoice')->get())
                                 ->table([
                                     EntryTableColumn::make(__('alfakit-invoices::invoices.fields.description'))->width('40%'),

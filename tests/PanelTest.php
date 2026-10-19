@@ -213,6 +213,20 @@ it('records payments from the panel and rejects overpayments', function (): void
     expect($invoice->refresh()->status)->toBe(InvoiceStatus::Paid)->and($invoice->amount_due)->toBe(0);
 });
 
+it('fills the payment form with the balance due, so submitting it pays the invoice', function (): void {
+    $invoice = invoice();
+    $invoice->markAsSent();
+    $due = (int) $invoice->refresh()->amount_due;
+
+    // The amount the form was filled with is what the browser sends back.
+    alfakit()->testPage(ViewInvoice::class, ['record' => $invoice], panel: 'invoices')
+        ->callAction('recordPayment', ['paid_at' => '2026-03-31', 'method' => 'cash'])
+        ->assertHasNoActionErrors();
+
+    expect($invoice->refresh()->amount_paid)->toBe($due)
+        ->and($invoice->status)->toBe(InvoiceStatus::Paid);
+});
+
 it('duplicates, converts quotes and issues credit notes from the panel', function (): void {
     $quote = invoice(['type' => InvoiceType::Quote]);
 
@@ -335,3 +349,10 @@ final class InvoicesReadOnlyPolicy
         return false;
     }
 }
+
+it('gives the line items the whole width of their section', function (): void {
+    $form = AlfaSix\AlfakitInvoices\Resources\InvoiceResource::form(AlfaSix\Alfakit\Schemas\Schema::make());
+    $items = $form->getComponent(fn (AlfaSix\Alfakit\Schemas\Components\Component $component): bool => $component instanceof AlfaSix\Alfakit\Forms\Components\Repeater);
+
+    expect($items?->getColumnSpan())->toBe(['default' => 'full']);
+});
