@@ -356,3 +356,20 @@ it('gives the line items the whole width of their section', function (): void {
 
     expect($items?->getColumnSpan())->toBe(['default' => 'full']);
 });
+
+it('keeps paid documents locked for users a Gate::before() lets through', function (): void {
+    alfakit()->setCurrentPanel(alfakit()->getPanel('invoices'));
+    Illuminate\Support\Facades\Gate::before(static fn (): bool => true); // Shield's super admin
+
+    $invoice = invoice();
+    $invoice->markAsPaid();
+    $invoice->refresh();
+
+    $resource = AlfaSix\AlfakitInvoices\Resources\InvoiceResource::class;
+
+    expect($invoice->status)->toBe(InvoiceStatus::Paid)
+        ->and($resource::can('update', $invoice))->toBeFalse()
+        ->and($resource::can('delete', $invoice))->toBeFalse()
+        ->and($resource::can('recordPayment', $invoice))->toBeFalse()
+        ->and($resource::can('view', $invoice))->toBeTrue();
+});

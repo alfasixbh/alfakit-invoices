@@ -35,12 +35,12 @@ class InvoicePolicy
 
     public function update(Model $user, Invoice $invoice): bool
     {
-        return $this->allowed($user, $invoice) && $invoice->isEditable();
+        return $this->allowed($user, $invoice) && self::stateAllows('update', $invoice);
     }
 
     public function delete(Model $user, Invoice $invoice): bool
     {
-        return $this->allowed($user, $invoice) && $invoice->status === InvoiceStatus::Draft && (int) $invoice->amount_paid === 0;
+        return $this->allowed($user, $invoice) && self::stateAllows('delete', $invoice);
     }
 
     public function deleteAny(Model $user): bool
@@ -50,17 +50,17 @@ class InvoicePolicy
 
     public function send(Model $user, Invoice $invoice): bool
     {
-        return $this->allowed($user, $invoice) && $invoice->canBeSent();
+        return $this->allowed($user, $invoice) && self::stateAllows('send', $invoice);
     }
 
     public function recordPayment(Model $user, Invoice $invoice): bool
     {
-        return $this->allowed($user, $invoice) && $invoice->isPayable();
+        return $this->allowed($user, $invoice) && self::stateAllows('recordPayment', $invoice);
     }
 
     public function void(Model $user, Invoice $invoice): bool
     {
-        return $this->allowed($user, $invoice) && $invoice->canBeVoided();
+        return $this->allowed($user, $invoice) && self::stateAllows('void', $invoice);
     }
 
     public function duplicate(Model $user, Invoice $invoice): bool
@@ -70,12 +70,31 @@ class InvoicePolicy
 
     public function convert(Model $user, Invoice $invoice): bool
     {
-        return $this->allowed($user, $invoice) && $invoice->canBeConverted();
+        return $this->allowed($user, $invoice) && self::stateAllows('convert', $invoice);
     }
 
     public function creditNote(Model $user, Invoice $invoice): bool
     {
-        return $this->allowed($user, $invoice) && $invoice->canBeCredited();
+        return $this->allowed($user, $invoice) && self::stateAllows('creditNote', $invoice);
+    }
+
+    /**
+     * What the document's state allows, whoever asks: only drafts are deleted, paid and void
+     * documents are locked. `InvoiceResource::can()` applies it too, so it also holds for users
+     * a `Gate::before()` lets through (Shield's super admin).
+     */
+    public static function stateAllows(string $ability, Invoice $invoice): bool
+    {
+        return match ($ability) {
+            'update' => $invoice->isEditable(),
+            'delete' => $invoice->status === InvoiceStatus::Draft && (int) $invoice->amount_paid === 0,
+            'send' => $invoice->canBeSent(),
+            'recordPayment' => $invoice->isPayable(),
+            'void' => $invoice->canBeVoided(),
+            'convert' => $invoice->canBeConverted(),
+            'creditNote' => $invoice->canBeCredited(),
+            default => true,
+        };
     }
 
     protected function allowed(Model $user, ?Invoice $invoice = null): bool

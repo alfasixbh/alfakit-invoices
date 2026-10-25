@@ -42,6 +42,7 @@ use AlfaSix\AlfakitInvoices\Models\Invoice;
 use AlfaSix\AlfakitInvoices\Models\InvoiceItem;
 use AlfaSix\AlfakitInvoices\Models\Payment;
 use AlfaSix\AlfakitInvoices\Models\Tax;
+use AlfaSix\AlfakitInvoices\Policies\InvoicePolicy;
 use AlfaSix\AlfakitInvoices\Resources\Concerns\IsInvoicesResource;
 use AlfaSix\AlfakitInvoices\Resources\InvoiceResource\Pages;
 use AlfaSix\AlfakitInvoices\Support\FormTotals;
@@ -75,6 +76,19 @@ class InvoiceResource extends Resource
 
     /** How many tax rates the form's totals panel lists (the saved document lists all). */
     protected static int $formTaxRows = 6;
+
+    /**
+     * The document's state is a business rule, not a permission: a paid or void document stays
+     * locked for users a `Gate::before()` allows everything (Shield's super admin) too.
+     */
+    public static function can(string $action, ?Model $record = null): bool
+    {
+        if ($record instanceof Invoice && ! InvoicePolicy::stateAllows($action, $record)) {
+            return false;
+        }
+
+        return parent::can($action, $record);
+    }
 
     public static function getModel(): string
     {
