@@ -28,7 +28,7 @@
   "require": {
     "php": "^8.4",
     "ext-intl": "*",
-    "alfasix/alfakit": "^0.1|@dev",
+    "alfasix/alfakit": "^0.2|@dev",
     "brick/math": "^0.11|^0.12|^0.13|^0.14|^0.15|^0.16|^0.17|^0.18|^0.19|^0.20|^1.0"
   },
   "suggest": {
@@ -54,7 +54,7 @@
       ]
     },
     "alfakit": {
-      "version": "^0.1",
+      "version": "^0.2",
       "frontend": null,
       "showcase": {
         "demoPath": "invoices",
