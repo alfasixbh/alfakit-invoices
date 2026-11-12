@@ -207,6 +207,7 @@ return [
         'void_with_payments' => 'I documenti con pagamenti non possono essere annullati. Emetti invece una nota di credito.',
         'cannot_convert' => 'Si possono convertire solo preventivi non convertiti né annullati.',
         'cannot_credit' => 'Le note di credito possono essere emesse solo per fatture inviate.',
+        'already_credited' => 'Questa fattura è già stata stornata per intero.',
         'not_payable' => 'Un documento di tipo :type non accetta pagamenti.',
         'void' => 'Questo documento è annullato.',
         'amount_positive' => 'L\'importo deve essere maggiore di zero.',

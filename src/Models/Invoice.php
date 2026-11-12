@@ -401,7 +401,15 @@ class Invoice extends Model
         $tenant = $this->getTenant();
 
         if ($editable) {
-            $items->each(static fn (InvoiceItem $item) => $item->refreshTaxSnapshot($tenant));
+            // An issued document and a credit note keep the rates they were issued with:
+            // only lines whose taxes were changed (or never copied) read the tax table.
+            $keepsRates = $this->status !== InvoiceStatus::Draft || $this->type === InvoiceType::CreditNote;
+
+            $items->each(static function (InvoiceItem $item) use ($tenant, $keepsRates): void {
+                if (! $keepsRates || ! $item->hasCurrentTaxSnapshot()) {
+                    $item->refreshTaxSnapshot($tenant);
+                }
+            });
         }
 
         $totals = Calculator::calculate($items->map(static fn (InvoiceItem $item) => $item->toLine())->values()->all(), $this->currency, $this->rounding);
@@ -503,6 +511,18 @@ class Invoice extends Model
     }
 
     /**
+     * The total of this invoice's credit notes that are not void (drafts included).
+     */
+    public function creditedTotal(): int
+    {
+        return (int) static::query()
+            ->where('source_id', $this->getKey())
+            ->where('type', InvoiceType::CreditNote->value)
+            ->where('status', '!=', InvoiceStatus::Void->value)
+            ->sum('total');
+    }
+
+    /**
      * Move to a status, or throw `InvalidStatusTransition`.
      */
     public function transitionTo(InvoiceStatus $status, bool $save = true): static
@@ -550,22 +570,39 @@ class Invoice extends Model
     }
 
     /**
+     * Lock the row and read it again (inside a transaction), so two requests acting on the
+     * same document take turns and the second sees what the first did.
+     */
+    protected function lockAndReload(): void
+    {
+        $fresh = static::query()->whereKey($this->getKey())->lockForUpdate()->first();
+
+        if ($fresh instanceof static) {
+            $this->setRawAttributes($fresh->getAttributes(), sync: true);
+        }
+    }
+
+    /**
      * Mark as sent to the customer (a draft gets its number). Sending again keeps the status.
      */
     public function markAsSent(): static
     {
-        if (! $this->canBeSent()) {
-            throw InvalidStatusTransition::make($this->status, InvoiceStatus::Sent);
-        }
+        DB::transaction(function (): void {
+            $this->lockAndReload();
 
-        $this->assignNumber();
+            if (! $this->canBeSent()) {
+                throw InvalidStatusTransition::make($this->status, InvoiceStatus::Sent);
+            }
 
-        if ($this->status === InvoiceStatus::Draft) {
-            $this->transitionTo(InvoiceStatus::Sent, save: false);
-        }
+            $this->assignNumber();
 
-        $this->sent_at = CarbonImmutable::now();
-        $this->save();
+            if ($this->status === InvoiceStatus::Draft) {
+                $this->transitionTo(InvoiceStatus::Sent, save: false);
+            }
+
+            $this->sent_at = CarbonImmutable::now();
+            $this->save();
+        });
 
         InvoiceSent::dispatch($this);
 
@@ -607,11 +644,7 @@ class Invoice extends Model
     {
         return DB::transaction(function () use ($amount, $paidAt, $method, $reference, $notes, $creditNote, $recordedBy): Payment {
             // Re-read the balance under a lock so concurrent payments can't overpay.
-            $fresh = static::query()->whereKey($this->getKey())->lockForUpdate()->first();
-
-            if ($fresh instanceof static) {
-                $this->setRawAttributes($fresh->getAttributes(), sync: true);
-            }
+            $this->lockAndReload();
 
             if (! $this->type->isPayable()) {
                 throw InvalidPayment::because('not_payable', ['type' => $this->type->getLabel()]);
@@ -814,11 +847,13 @@ class Invoice extends Model
      */
     public function convertToInvoice(): static
     {
-        if (! $this->canBeConverted()) {
-            throw InvalidStatusTransition::because('cannot_convert');
-        }
-
         return DB::transaction(function (): static {
+            $this->lockAndReload();
+
+            if (! $this->canBeConverted()) {
+                throw InvalidStatusTransition::because('cannot_convert');
+            }
+
             $invoice = $this->duplicate(InvoiceType::Invoice, (int) $this->getKey());
 
             $this->assignNumber();
@@ -841,6 +876,13 @@ class Invoice extends Model
         }
 
         return DB::transaction(function () use ($apply): static {
+            // One request at a time, so two clicks cannot credit the same invoice twice.
+            static::query()->whereKey($this->getKey())->lockForUpdate()->first();
+
+            if ($this->creditedTotal() >= (int) $this->total) {
+                throw InvalidStatusTransition::because('already_credited');
+            }
+
             $creditNote = $this->duplicate(InvoiceType::CreditNote, (int) $this->getKey());
 
             if ($apply) {

@@ -207,6 +207,7 @@ return [
         'void_with_payments' => 'Les documents avec paiements ne peuvent pas être annulés. Émettez plutôt un avoir.',
         'cannot_convert' => 'Seuls les devis non convertis et non annulés peuvent être convertis.',
         'cannot_credit' => 'Les avoirs ne peuvent être émis que pour des factures envoyées.',
+        'already_credited' => 'Cette facture a déjà fait l’objet d’un avoir pour la totalité.',
         'not_payable' => 'Un document de type :type n\'accepte pas de paiements.',
         'void' => 'Ce document est annulé.',
         'amount_positive' => 'Le montant doit être supérieur à zéro.',

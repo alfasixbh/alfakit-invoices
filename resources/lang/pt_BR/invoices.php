@@ -207,6 +207,7 @@ return [
         'void_with_payments' => 'Documentos com pagamentos não podem ser cancelados. Emita uma nota de crédito.',
         'cannot_convert' => 'Só podem ser convertidos orçamentos não convertidos nem cancelados.',
         'cannot_credit' => 'Notas de crédito só podem ser emitidas para faturas enviadas.',
+        'already_credited' => 'Esta fatura já foi creditada integralmente.',
         'not_payable' => 'Um documento do tipo :type não aceita pagamentos.',
         'void' => 'Este documento está cancelado.',
         'amount_positive' => 'O valor deve ser maior que zero.',

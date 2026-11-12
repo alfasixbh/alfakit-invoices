@@ -124,7 +124,7 @@ it('records partial and full payments', function (): void {
         ->and($invoice->amount_due)->toBe(0)
         ->and($invoice->paid_at)->not->toBeNull()
         ->and($invoice->isEditable())->toBeFalse()
-        ->and(Payment::query()->where('invoice_id', $invoice->id)->sum('amount'))->toBe(100000);
+        ->and((int) Payment::query()->where('invoice_id', $invoice->id)->sum('amount'))->toBe(100000);
 
     Event::assertDispatchedTimes(PaymentRecorded::class, 2);
     Event::assertDispatchedTimes(InvoicePaid::class, 1);
@@ -277,4 +277,28 @@ it('duplicates a document as a new draft', function (): void {
         ->and($copy->notes)->toBe('Thanks')
         ->and($copy->total)->toBe($original->total)
         ->and($copy->sent_at)->toBeNull();
+});
+
+it('keeps the issued tax rates on a credit note and on an edited sent invoice', function (): void {
+    $vat = tax('VAT', '10');
+    $invoice = invoice(items: [['description' => 'Consulting', 'quantity' => '2', 'unit_price' => 50000, 'tax_ids' => [$vat->id]]]);
+    $invoice->markAsSent();
+    $total = $invoice->refresh()->total;
+
+    $vat->update(['rate' => '20']);
+
+    $invoice->update(['notes' => 'Typo fixed']);
+    $invoice->recalculate();
+
+    expect($invoice->refresh()->total)->toBe($total)
+        ->and($invoice->createCreditNote(apply: false)->total)->toBe($total);
+});
+
+it('does not credit an invoice twice', function (): void {
+    $invoice = invoice();
+    $invoice->markAsSent();
+    $invoice->createCreditNote();
+
+    expect(fn () => $invoice->refresh()->createCreditNote())->toThrow(InvalidStatusTransition::class, 'already credited')
+        ->and(Invoice::query()->where('source_id', $invoice->id)->count())->toBe(1);
 });

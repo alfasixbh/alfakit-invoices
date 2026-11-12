@@ -373,3 +373,23 @@ it('keeps paid documents locked for users a Gate::before() lets through', functi
         ->and($resource::can('recordPayment', $invoice))->toBeFalse()
         ->and($resource::can('view', $invoice))->toBeTrue();
 });
+
+it('keeps the issued tax rate when a sent invoice is edited after the tax changed', function (): void {
+    $vat = tax('VAT', '10');
+    $invoice = invoice(items: [['description' => 'Consulting', 'quantity' => '2', 'unit_price' => 50000, 'tax_ids' => [$vat->id]]]);
+    $invoice->markAsSent();
+    $total = $invoice->refresh()->total;
+
+    $vat->update(['rate' => '20']);
+
+    alfakit()->testPage(EditInvoice::class, ['record' => $invoice], panel: 'invoices')
+        ->assertOk()
+        ->fillForm(['notes' => 'Typo fixed'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($invoice->refresh()->notes)->toBe('Typo fixed')
+        ->and($invoice->total)->toBe($total)
+        // 10% on top of the untaxed amount, not the 20% the tax has now.
+        ->and($total)->toBe((int) ($invoice->subtotal * 1.1));
+});

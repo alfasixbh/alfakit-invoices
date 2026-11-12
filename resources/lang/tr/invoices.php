@@ -207,6 +207,7 @@ return [
         'void_with_payments' => 'Ödemesi olan belgeler iptal edilemez. Bunun yerine alacak dekontu düzenleyin.',
         'cannot_convert' => 'Yalnızca dönüştürülmemiş ve iptal edilmemiş teklifler dönüştürülebilir.',
         'cannot_credit' => 'Alacak dekontu yalnızca gönderilmiş faturalar için düzenlenebilir.',
+        'already_credited' => 'Bu faturanın tamamı için zaten alacak dekontu düzenlendi.',
         'not_payable' => ':type türündeki bir belge ödeme kabul etmez.',
         'void' => 'Bu belge iptal edilmiş.',
         'amount_positive' => 'Tutar sıfırdan büyük olmalıdır.',

@@ -207,6 +207,7 @@ return [
         'void_with_payments' => '有付款的单据无法作废，请改为开具贷项通知单。',
         'cannot_convert' => '只有未转换且未作废的报价单可以转换。',
         'cannot_credit' => '只能为已发送的发票开具贷项通知单。',
+        'already_credited' => '此发票已全额开具贷项通知单。',
         'not_payable' => ':type 不接受付款。',
         'void' => '此单据已作废。',
         'amount_positive' => '金额必须大于零。',

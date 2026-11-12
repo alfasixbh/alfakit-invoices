@@ -207,6 +207,7 @@ return [
         'void_with_payments' => 'Dokumente mit Zahlungen können nicht storniert werden. Stellen Sie stattdessen eine Gutschrift aus.',
         'cannot_convert' => 'Nur Angebote, die weder umgewandelt noch storniert wurden, können umgewandelt werden.',
         'cannot_credit' => 'Gutschriften können nur für versendete Rechnungen ausgestellt werden.',
+        'already_credited' => 'Diese Rechnung wurde bereits vollständig gutgeschrieben.',
         'not_payable' => 'Ein Dokument vom Typ :type nimmt keine Zahlungen an.',
         'void' => 'Dieses Dokument ist storniert.',
         'amount_positive' => 'Der Betrag muss größer als null sein.',

@@ -103,6 +103,23 @@ class InvoiceItem extends Model
     }
 
     /**
+     * Whether the copied rates belong to the taxes the line has now.
+     */
+    public function hasCurrentTaxSnapshot(): bool
+    {
+        if (! is_array($this->taxes)) {
+            return false;
+        }
+
+        $ids = array_map(static fn (mixed $id): string => is_scalar($id) ? (string) $id : '', $this->tax_ids ?? []);
+        $copied = array_map(static fn (TaxRate $tax): string => (string) $tax->id, $this->taxRates());
+        sort($ids);
+        sort($copied);
+
+        return $ids === $copied;
+    }
+
+    /**
      * Names of the line's taxes: `VAT 10%, Service 5%`.
      */
     public function getTaxLabel(): string

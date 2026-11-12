@@ -207,6 +207,7 @@ return [
         'void_with_payments' => 'Documenten met betalingen kunnen niet vervallen worden verklaard. Geef een creditnota uit.',
         'cannot_convert' => 'Alleen offertes die niet zijn omgezet of vervallen kunnen worden omgezet.',
         'cannot_credit' => 'Creditnota\'s kunnen alleen voor verzonden facturen worden uitgegeven.',
+        'already_credited' => 'Deze factuur is al volledig gecrediteerd.',
         'not_payable' => 'Een document van het soort :type accepteert geen betalingen.',
         'void' => 'Dit document is vervallen.',
         'amount_positive' => 'Het bedrag moet groter zijn dan nul.',

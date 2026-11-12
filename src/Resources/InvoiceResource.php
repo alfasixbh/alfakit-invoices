@@ -29,6 +29,7 @@ use AlfaSix\Alfakit\Schemas\Components\Utilities\Set;
 use AlfaSix\Alfakit\Schemas\Schema;
 use AlfaSix\Alfakit\Support\Currency;
 use AlfaSix\Alfakit\Support\Enums\Alignment;
+use AlfaSix\Alfakit\Support\SearchQuery;
 use AlfaSix\Alfakit\Tables\Columns\TextColumn;
 use AlfaSix\Alfakit\Tables\Filters\Filter;
 use AlfaSix\Alfakit\Tables\Filters\SelectFilter;
@@ -196,7 +197,7 @@ class InvoiceResource extends Resource
 
                     $query->where(static function (Builder $query) use ($plugin, $search): void {
                         foreach ($plugin->getCustomerSearchColumns() as $column) {
-                            $query->orWhere($column, 'like', '%'.str_replace(['%', '_'], ['\%', '\_'], $search).'%');
+                            SearchQuery::contains($query, $column, $search, or: true);
                         }
                     });
 

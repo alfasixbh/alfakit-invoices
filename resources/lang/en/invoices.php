@@ -207,6 +207,7 @@ return [
         'void_with_payments' => 'Documents with payments can\'t be voided. Issue a credit note instead.',
         'cannot_convert' => 'Only quotes that weren\'t converted or voided can be converted.',
         'cannot_credit' => 'Credit notes can only be issued for sent invoices.',
+        'already_credited' => 'This invoice is already credited in full.',
         'not_payable' => 'A :type doesn\'t take payments.',
         'void' => 'This document is void.',
         'amount_positive' => 'The amount must be more than zero.',

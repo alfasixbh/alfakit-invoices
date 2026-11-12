@@ -207,6 +207,7 @@ return [
         'void_with_payments' => 'Los documentos con pagos no se pueden anular. Emita una nota de crédito.',
         'cannot_convert' => 'Solo se pueden convertir presupuestos no convertidos ni anulados.',
         'cannot_credit' => 'Las notas de crédito solo se pueden emitir para facturas enviadas.',
+        'already_credited' => 'Esta factura ya se ha abonado por completo.',
         'not_payable' => 'Un documento de tipo :type no admite pagos.',
         'void' => 'Este documento está anulado.',
         'amount_positive' => 'El importe debe ser mayor que cero.',
